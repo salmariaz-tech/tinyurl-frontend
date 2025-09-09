@@ -7,6 +7,9 @@ export default function ShortenerForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Use Railway deployed backend URL
+  const API_BASE_URL = "https://tinyurl-server-production-fec5.up.railway.app";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -19,34 +22,29 @@ export default function ShortenerForm() {
     setError("");
     setShortUrl("");
 
-   try {
-  const response = await axios.post("http://localhost:5050/url/save", {
-    longUrl,
-  });
+    try {
+      // ✅ Updated API URL for deployed backend
+      const response = await axios.post(`${API_BASE_URL}/url/save`, {
+        longUrl,
+      });
 
-  console.log("📩 RAW RESPONSE FROM SERVER:", response);
+      console.log("📩 Response from server:", response);
 
-  // Check what's inside response.data
-  console.log("📩 RESPONSE.DATA:", response.data);
-
-  if (response.data && response.data.ok) {
-    console.log("✅ Short URL from server:", response.data.shortUrl);
-    setShortUrl(response.data.shortUrl);
-    setError("");
-  } else {
-    console.log("⚠️ Server returned unexpected response:", response.data);
-    setError(response.data?.message || "Failed to generate short URL!");
-  }
-} catch (err) {
-  console.error("❌ AXIOS ERROR OBJECT:", err);
-  console.log("❌ ERROR RESPONSE:", err.response);
-  setError(err.response?.data?.message || "Something went wrong!");
-}
- finally {
+      if (response.data && response.data.ok) {
+        setShortUrl(response.data.shortUrl);
+        setError("");
+      } else {
+        setError(response.data?.message || "Failed to generate short URL!");
+      }
+    } catch (err) {
+      console.error("❌ AXIOS ERROR:", err);
+      setError(err.response?.data?.message || "Something went wrong!");
+    } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Copy short URL to clipboard
   const handleCopy = () => {
     navigator.clipboard.writeText(shortUrl);
     alert("✅ Short URL copied to clipboard!");
@@ -74,8 +72,10 @@ export default function ShortenerForm() {
         </button>
       </form>
 
+      {/* Show error message */}
       {error && <p className="text-red-500 mt-3">{error}</p>}
 
+      {/* Show shortened URL */}
       {shortUrl && (
         <div className="mt-4">
           <p className="text-green-600">
